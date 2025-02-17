@@ -1,5 +1,74 @@
 <!DOCTYPE html>
+<html lang="fr">
 
-<p>test ok</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Run</title>
+</head>
+
+<body>
+    <p>Test Run</p>
+
+    <label for="yearSelect">Choisir une année :</label>
+    <select id="yearSelect">
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+    </select>
+    <br/>
+    <button id="prevWeek">Précédente</button>
+    <span id="weekDisplay">Semaine: 1</span>
+    <button id="nextWeek">Suivante</button>
+
+    <script>
+        function getDateWeek(date) {
+            const currentDate = (typeof date === 'object') ? date : new Date();
+            const januaryFirst = new Date(currentDate.getFullYear(), 0, 1);
+            const daysToNextMonday = (januaryFirst.getDay() === 1) ? 0 : (7 - januaryFirst.getDay()) % 7;
+            const nextMonday = new Date(currentDate.getFullYear(), 0, januaryFirst.getDate() + daysToNextMonday);
+
+            return (currentDate < nextMonday) ? 52 : Math.ceil((currentDate - nextMonday) / (24 * 3600 * 1000) / 7);
+        }
+
+        let selectedYear = new Date().getFullYear();
+        let currentWeek = getDateWeek(new Date()) + 1;
+
+        function updateJsonPath() {
+            const jsonFilePath = `${selectedYear}/week_${currentWeek}.json`;
+            document.getElementById("weekDisplay").textContent = `Semaine: ${currentWeek}`;
+            console.log("Ouverture du fichier JSON :", jsonFilePath);
+
+            fetch(jsonFilePath)
+                .then(response => response.json()) // Parse JSON
+                .then(data => console.log(data)) // Work with JSON data
+                .catch(error => console.error('Error fetching JSON:', error));
+        }
+
+        document.getElementById("yearSelect").addEventListener("change", function () {
+            selectedYear = parseInt(this.value);
+            currentWeek = 1;
+            updateJsonPath();
+        });
+
+        document.getElementById("prevWeek").addEventListener("click", function () {
+            if (currentWeek > 1) {
+                currentWeek--;
+                updateJsonPath();
+            }
+        });
+
+        document.getElementById("nextWeek").addEventListener("click", function () {
+            if (currentWeek < 52) {
+                currentWeek++;
+                updateJsonPath();
+            }
+        });
+
+        // Initialisation
+        document.getElementById("yearSelect").value = selectedYear;
+        updateJsonPath();
+    </script>
+</body>
 
 </html>
